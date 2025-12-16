@@ -72,28 +72,45 @@ function CustomerPage() {
   }, [userEmail])
 
   // Fetch barbers from the API
-  useEffect(() => {
-    const fetchBarbers = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch("http://localhost:4000/barbers")
+useEffect(() => {
+  const fetchBarbers = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("http://localhost:4000/barbers")
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch barbers")
-        }
-
-        const data = await response.json()
-        setBarbers(data)
-        setLoading(false)
-      } catch (err) {
-        console.error("Error fetching barbers:", err)
-        setError("Failed to load barbers. Please try again later.")
-        setLoading(false)
+      if (!response.ok) {
+        throw new Error("Failed to fetch barbers")
       }
-    }
 
-    fetchBarbers()
-  }, [])
+      const data = await response.json()
+
+      // 🔥 NORMALIZE BACKEND DATA FOR FRONTEND
+      const formattedBarbers = data.map((barber) => ({
+  id: barber._id,
+  name: `${barber.firstName} ${barber.lastName}`,
+  email: barber.email,
+  phone: barber.phone,
+  shopName: barber.shopName,
+  experience: barber.experience,
+  specialties: barber.specialties || [],
+  image: barber.image || "https://placehold.co/300x300?text=Barber",
+  rating: barber.rating || 4.5,
+  reviews: barber.reviews || 50
+}))
+
+
+      setBarbers(formattedBarbers)
+      setLoading(false)
+    } catch (err) {
+      console.error("Error fetching barbers:", err)
+      setError("Failed to load barbers. Please try again later.")
+      setLoading(false)
+    }
+  }
+
+  fetchBarbers()
+}, [])
+
 
   // Fetch user appointments when email changes
   const fetchUserAppointments = async (email) => {
@@ -176,8 +193,14 @@ function CustomerPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
-          service: serviceName, // Use the service name instead of ID
+         customerName: formData.name,
+  email: formData.email,
+  phone: formData.phone,
+  service: serviceName,
+  barber: formData.barber,
+  date: formData.date,
+  time: formData.time,
+  notes: formData.notes,
         }),
       })
 
@@ -227,6 +250,19 @@ function CustomerPage() {
       return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pending</span>
     }
   }
+
+  const cancelAppointment = async (id) => {
+  try {
+    await fetch(`http://localhost:4000/appointments/${id}`, {
+      method: "DELETE",
+    })
+
+    fetchUserAppointments(userEmail)
+  } catch (err) {
+    console.error("Cancel failed", err)
+  }
+}
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -444,8 +480,36 @@ function CustomerPage() {
                     className="overflow-hidden rounded-lg bg-white shadow-md h-[400px] flex flex-col"
                   >
                     <div className="p-6 flex-1">
-                      <h3 className="text-xl font-bold">{barber.name}</h3>
-                      <p className="mt-2 text-sm text-gray-600">{barber.experience}</p>
+  {/* Barber Image */}
+  
+  <div className="flex items-center justify-between">
+  <h3 className="text-xl font-bold">{barber.name}</h3>
+
+  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+    Top Barber
+  </span>
+</div>
+
+<p className="text-yellow-500 text-sm mt-1">
+  ⭐ {barber.rating} ({barber.reviews} reviews)
+</p>
+
+<p className="text-sm text-gray-500 mt-1">
+  {barber.shopName}
+</p>
+
+<p className="mt-2 text-sm text-gray-600">
+  Experience: {barber.experience}
+</p>
+
+
+  {/* Rating */}
+  <p className="text-yellow-500 text-sm mt-1">
+    ⭐ {barber.rating} ({barber.reviews} reviews)
+  </p>
+
+  <p className="mt-2 text-sm text-gray-600">{barber.experience}</p>
+
                       <div className="mt-4">
                         <h4 className="font-medium">Specialties:</h4>
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -519,6 +583,13 @@ function CustomerPage() {
                     <h3 className="font-medium text-lg">Your Appointments</h3>
                     {userAppointments.map((appointment) => (
                       <div key={appointment._id} className="border rounded-lg p-4">
+                        <button
+   onClick={() => cancelAppointment(appointment._id)}
+  className="mt-3 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+>
+  Cancel Appointment
+</button>
+
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-medium">{appointment.service}</h4>
@@ -811,7 +882,7 @@ function CustomerPage() {
                   <FaPhone />
                 </div>
                 <h3 className="mt-4 text-lg font-medium">Phone</h3>
-                <p className="mt-2 text-gray-600">(+91) 9335891448 </p>
+                <p className="mt-2 text-gray-600">(+91) 7985639124 </p>
               </div>
 
               <div className="rounded-lg bg-white p-6 shadow-sm text-center">
@@ -852,7 +923,7 @@ function CustomerPage() {
                 <p>Basti,NIT JAMSHEDPUR </p>
                 <p className="mt-2 flex items-center gap-2">
                   <FaPhone className="h-4 w-4" />
-                  <span>(+91) 9335891448 </span>
+                  <span>(+91) 7985639124 </span>
                 </p>
               </address>
             </div>

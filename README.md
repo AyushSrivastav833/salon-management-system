@@ -40,8 +40,6 @@ ssb/
 │ ├── server.js
 └── README.md
 
-shell
-Copy code
 
 ## ✨ Author
 Ayush Srivastav

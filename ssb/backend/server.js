@@ -30,6 +30,18 @@ app.use(express.json())
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
+  .then(async () => {
+    console.log("MongoDB connected successfully")
+    console.log("Database Name:", mongoose.connection.db.databaseName)
+
+    const count = await Barber.countDocuments()
+    console.log("Total Barbers:", count)
+
+    const PORT = process.env.PORT || 4000
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`)
+    })
+  })
   .then(() => {
     console.log("MongoDB connected successfully")
 
@@ -126,8 +138,13 @@ app.post("/barber-login", async (req, res) => {
 
 // Get all barbers
 app.get("/barbers", async (req, res) => {
-  const barbers = await Barber.find({}, { password: 0 })
-  res.json(barbers)
+  try {
+    res.set("Cache-Control", "no-store") // 🔥 THIS IS THE FIX
+    const barbers = await Barber.find({}, { password: 0 })
+    res.status(200).json(barbers)
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch barbers" })
+  }
 })
 
 // Create appointment

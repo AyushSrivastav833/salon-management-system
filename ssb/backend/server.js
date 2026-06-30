@@ -127,13 +127,22 @@ app.post("/barber-login", async (req, res) => {
 // Get all barbers
 app.get("/barbers", async (req, res) => {
   try {
-    res.set("Cache-Control", "no-store") // 🔥 THIS IS THE FIX
-    const barbers = await Barber.find({}, { password: 0 })
-    res.status(200).json(barbers)
+    console.log("Collection:", Barber.collection.name);
+    console.log("Database:", mongoose.connection.name);
+
+    const count = await Barber.countDocuments();
+    console.log("Count:", count);
+
+    const docs = await Barber.find();
+
+    console.log("Documents:", docs);
+
+    res.json(docs);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch barbers" })
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // Create appointment
 app.post("/appointments", async (req, res) => {

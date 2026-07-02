@@ -141,7 +141,7 @@ app.get("/barbers", async (req, res) => {
     const count = await Barber.countDocuments();
     console.log("Count:", count);
 
-    const docs = await Barber.find();
+    const docs = await Barber.find().select("-password");
 
     console.log("Documents:", docs);
 

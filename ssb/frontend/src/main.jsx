@@ -8,6 +8,7 @@ import BarberPage from "./Barberpage.jsx"
 import SignIn from "./signin.jsx"
 import CreateAccount from "./createaccount.jsx"
 import BarberProfile from "./profile.jsx"
+import HairstyleRecommendation from "./HairstyleRecommendation.jsx"
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/barberSignIn" element={<SignIn />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/profile" element={<BarberProfile />} />
+        <Route path="/ai-hairstyle" element={<HairstyleRecommendation />}/>
       </Routes>
     </Router>
   </StrictMode>,

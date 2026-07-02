@@ -1,13 +1,34 @@
+
 import { useState, useEffect, useRef } from "react"
 import { FaPhone, FaCalendarAlt, FaUser, FaEnvelope, FaClock, FaBell } from "react-icons/fa"
 import { GiScissors } from "react-icons/gi"
 import { io } from "socket.io-client" // This requires socket.io-client to be installed
-const API_BASE = "https://salon-backend-dtum.onrender.com";
+// const API_BASE = "https://salon-backend-dtum.onrender.com";
+const API_BASE = "http://localhost:4000";
 
 
 
 
-
+const hairstyleImages = {
+  "French Crop":
+    "https://images.unsplash.com/photo-1517832606299-7ae9b720a186?w=400",
+  "Pompadour":
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
+  "Quiff":
+    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
+  "High Fade":
+    "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400",
+  "Side Part":
+    "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=400",
+  "Buzz Cut":
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
+  "Crew Cut":
+    "https://images.unsplash.com/photo-1521119989659-a83eee488004?w=400",
+  "Business Cut":
+    "https://images.unsplash.com/photo-1519415943484-9fa1873496d4?w=400",
+  "Fade with Beard":
+    "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400",
+};
 
 
 function CustomerPage() {
@@ -24,6 +45,18 @@ function CustomerPage() {
   const [loadingAppointments, setLoadingAppointments] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState("")
+  const [aiLoading, setAiLoading] = useState(false);
+
+const [aiForm, setAiForm] = useState({
+  faceShape: "",
+  hairType: "",
+  hairLength: "",
+  lifestyle: "",
+  beard: "",
+  age: "",
+});
+
+const [aiResult, setAiResult] = useState(null);
   const socketRef = useRef(null)
   const [formData, setFormData] = useState({
     name: "",
@@ -75,9 +108,12 @@ function CustomerPage() {
       })
     }
   }, [userEmail])
+ 
+   
 
   // Fetch barbers from the API
-const API_BASE = "https://salon-backend-dtum.onrender.com";
+// const API_BASE = "https://salon-backend-dtum.onrender.com";
+const API_BASE = "http://localhost:4000";
 
 useEffect(() => {
   const fetchBarbers = async () => {
@@ -188,6 +224,13 @@ useEffect(() => {
     }
   }
 
+  const handleAiChange = (e) => {
+  setAiForm({
+    ...aiForm,
+    [e.target.name]: e.target.value,
+  });
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
@@ -256,6 +299,39 @@ setBookingSuccess(true)
   const handleBookWithBarber = (barberName) => {
     setSelectedBarber(barberName)
   }
+
+  const generateRecommendation = async () => {
+
+  if (!aiForm.faceShape ||!aiForm.hairType ||!aiForm.hairLength ||!aiForm.lifestyle) {
+  alert("Please fill all fields first.");
+  return;
+}
+
+  setAiLoading(true);
+
+  try {
+    const response = await fetch(`${API_BASE}/api/ai/hairstyle`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(aiForm),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setAiResult(data.recommendation);
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Please try again.");
+  }
+
+  setAiLoading(false);
+};
 
   // Format appointment status for display
   const getStatusBadge = (appointment) => {
@@ -676,6 +752,239 @@ setBookingSuccess(true)
             </div>
           </div>
         </section>
+
+        {/* AI Hairstyle Advisor */}
+<section className="py-16 bg-gray-50">
+  <div className="container mx-auto px-4">
+    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+
+      <h2 className="text-3xl font-bold text-center">
+        ✨ AI Hairstyle Advisor
+      </h2>
+
+      <p className="text-center text-gray-600 mt-2">
+        Let AI recommend the perfect hairstyle for you.
+      </p>
+
+      <div className="grid md:grid-cols-2 gap-4 mt-8">
+
+        <select
+          name="faceShape"
+          value={aiForm.faceShape}
+          onChange={handleAiChange}
+          className="border rounded-md p-2"
+        >
+          <option value="">Select Face Shape</option>
+          <option>Oval</option>
+          <option>Round</option>
+          <option>Square</option>
+          <option>Heart</option>
+          <option>Diamond</option>
+        </select>
+
+        <select
+          name="hairType"
+          value={aiForm.hairType}
+          onChange={handleAiChange}
+          className="border rounded-md p-2"
+        >
+          <option value="">Select Hair Type</option>
+          <option>Straight</option>
+          <option>Wavy</option>
+          <option>Curly</option>
+          <option>Coily</option>
+        </select>
+
+        <select
+          name="hairLength"
+          value={aiForm.hairLength}
+          onChange={handleAiChange}
+          className="border rounded-md p-2"
+        >
+          <option value="">Hair Length</option>
+          <option>Short</option>
+          <option>Medium</option>
+          <option>Long</option>
+        </select>
+
+        <select
+  name="beard"
+  value={aiForm.beard}
+  onChange={handleAiChange}
+  className="border rounded-md p-2"
+>
+  <option value="">Beard</option>
+  <option>Clean Shaven</option>
+  <option>Light Stubble</option>
+  <option>Full Beard</option>
+</select>
+
+    <input
+  type="number"
+  name="age"
+  placeholder="Age"
+  value={aiForm.age}
+  onChange={handleAiChange}
+  className="border rounded-md p-2"
+/>
+
+        <select
+          name="lifestyle"
+          value={aiForm.lifestyle}
+          onChange={handleAiChange}
+          className="border rounded-md p-2"
+        >
+          <option value="">Lifestyle</option>
+          <option>Student</option>
+          <option>Professional</option>
+          <option>Athlete</option>
+          <option>Minimal Maintenance</option>
+        </select>
+
+      </div>
+
+      <div className="text-center mt-6">
+        <button
+  disabled={aiLoading}
+  onClick={generateRecommendation}
+  className={`rounded-lg px-6 py-3 text-white font-bold ${
+    aiLoading
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-600 hover:bg-blue-700"
+  }`}
+>
+  {aiLoading ? "Thinking..." : "✨ Get AI Recommendation"}
+</button>
+      </div>
+
+      {aiResult && (
+  <div className="mt-8 rounded-2xl shadow-xl border bg-white p-8">
+
+    <h2 className="text-3xl font-bold text-center mb-6">
+      ✨ AI Hairstyle Recommendation
+    </h2>
+
+    {/* Best Match */}
+
+    <div className="bg-blue-50 rounded-xl p-6 border">
+
+      <h3 className="text-2xl font-bold text-blue-700">
+        💇 Best Match
+      </h3>
+
+      <h1 className="text-4xl font-extrabold mt-3">
+        {aiResult.recommendedStyles[0]}
+      </h1>
+
+      <div className="flex gap-2 mt-3 text-yellow-500 text-2xl">
+        ⭐⭐⭐⭐⭐
+      </div>
+
+    </div>
+
+    {/* Other Styles */}
+
+    <div className="mt-8">
+
+      <h3 className="text-xl font-semibold mb-3">
+        Other Recommended Styles
+      </h3>
+
+      <div className="flex flex-wrap gap-3">
+
+        {aiResult.recommendedStyles.slice(1).map((style) => (
+
+          <span
+            key={style}
+            className="bg-gray-100 px-4 py-2 rounded-full shadow"
+          >
+            💈 {style}
+          </span>
+
+        ))}
+
+      </div>
+
+    </div>
+
+    {/* Why */}
+
+    <div className="mt-8 border rounded-xl p-5">
+
+      <h3 className="text-xl font-bold">
+        ✅ Why this style?
+      </h3>
+
+      <p className="mt-2 text-gray-700">
+        {aiResult.reason}
+      </p>
+
+    </div>
+
+    {/* Maintenance */}
+
+    <div className="mt-6 grid md:grid-cols-2 gap-5">
+
+      <div className="border rounded-xl p-5 bg-green-50">
+
+        <h3 className="font-bold text-lg">
+          ✂ Maintenance
+        </h3>
+
+        <p className="mt-2">
+          {aiResult.maintenance}
+        </p>
+
+      </div>
+
+      <div className="border rounded-xl p-5 bg-yellow-50">
+
+        <h3 className="font-bold text-lg">
+          💰 Estimated Price
+        </h3>
+
+        <p className="mt-2">
+          {aiResult.estimatedPrice}
+        </p>
+
+      </div>
+
+    </div>
+
+    {/* Book Button */}
+
+    <div className="text-center mt-8">
+
+      <button
+  onClick={() => {
+
+    // Automatically fill the Service field
+    setFormData((prev) => ({
+      ...prev,
+      service: aiResult.recommendedStyles[0],
+    }));
+
+    // Scroll to booking form
+    document
+      .getElementById("booking")
+      ?.scrollIntoView({
+        behavior: "smooth",
+      });
+
+  }}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold"
+>
+  Book This Style
+</button>
+
+    </div>
+
+  </div>
+)}
+
+    </div>
+  </div>
+</section>
 
         {/* Booking Form Section */}
         <section id="booking" className="py-16">

@@ -1,38 +1,16 @@
-const { GoogleGenAI } = require("@google/genai");
+require("dotenv").config();
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-async function getHairstyleRecommendation(data) {
-  const prompt = `
-You are an expert professional barber.
-
-Suggest hairstyles based on:
-
-Face Shape: ${data.faceShape}
-Hair Type: ${data.hairType}
-Hair Length: ${data.hairLength}
-Lifestyle: ${data.lifestyle}
-
-Return ONLY valid JSON like this:
-
-{
-  "recommendedStyles": ["Style1","Style2","Style3"],
-  "reason":"Explain why.",
-  "maintenance":"Every X weeks.",
-  "estimatedPrice":"₹300-₹700"
-}
-`;
-
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-  });
-
-  return response.text;
-}
+console.log("THIS IS THE NEW FILE");
+console.log("KEY:", process.env.GEMINI_API_KEY);
 
 module.exports = {
-  getHairstyleRecommendation,
+  getHairstyleRecommendation: async () => {
+    console.log("INSIDE DUMMY AI");
+    return JSON.stringify({
+      recommendedStyles: ["Fade"],
+      reason: "Dummy",
+      maintenance: "Every 3 weeks",
+      estimatedPrice: "₹300",
+    });
+  },
 };

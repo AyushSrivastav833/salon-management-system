@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from "react"
 import { FaPhone, FaCalendarAlt, FaUser, FaEnvelope, FaClock, FaBell } from "react-icons/fa"
 import { GiScissors } from "react-icons/gi"
 import { io } from "socket.io-client" // This requires socket.io-client to be installed
-// const API_BASE = "https://salon-backend-dtum.onrender.com";
-const API_BASE = "http://localhost:4000";
+const API_BASE = "https://salon-backend-dtum.onrender.com";
+
 
 
 
@@ -112,8 +112,8 @@ const [aiResult, setAiResult] = useState(null);
    
 
   // Fetch barbers from the API
-// const API_BASE = "https://salon-backend-dtum.onrender.com";
-const API_BASE = "http://localhost:4000";
+const API_BASE = "https://salon-backend-dtum.onrender.com";
+
 
 useEffect(() => {
   const fetchBarbers = async () => {
